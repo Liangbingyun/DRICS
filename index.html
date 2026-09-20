@@ -59,12 +59,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
   <!-- Defer non-critical JavaScript -->
-  <script defer src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <script defer src="https://documentcloud.adobe.com/view-sdk/main.js"></script>
   <script defer src="static/js/fontawesome.all.min.js"></script>
   <script defer src="static/js/bulma-carousel.min.js"></script>
   <script defer src="static/js/bulma-slider.min.js"></script>
-  <script defer src="static/js/index.js"></script>
+  <script defer src="static/js/index.js?v=2"></script>
   
   <!-- Structured Data for Academic Papers (anonymized for double-blind review) -->
   <script type="application/ld+json">
@@ -192,89 +190,434 @@
 <!-- End paper abstract -->
 
 
-<!-- Image carousel -->
+<!-- Overview -->
 <section class="hero is-small">
   <div class="hero-body">
-    <div class="container">
-      <div id="results-carousel" class="carousel results-carousel">
-       <div class="item">
-        <img src="static/images/carousel1.jpg" alt="DRICS framework overview: command compensator reshapes the velocity command of the frozen base policy" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          DRICS overview: a command compensator reshapes the velocity command of the frozen base policy, using ground-truth disturbances during training and ESO estimates at deployment.
-        </h2>
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Overview</h2>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <img src="static/images/overview.png" alt="DRICS framework: a command compensator reshapes the velocity command of the frozen base policy" loading="lazy"/>
+          <h2 class="subtitle has-text-centered">
+            A command compensator reshapes the velocity command of the <b>frozen</b> base policy. Disturbance observations use ground truth during training and ESO estimates at deployment; actor gradients traverse the frozen base and update only the compensator.
+          </h2>
+        </div>
       </div>
-      <div class="item">
-        <img src="static/images/carousel2.jpg" alt="Indoor loaded-cart towing: Base drifts toward the wall while DRICS keeps a straighter path" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          Indoor loaded-cart towing: the Base policy progressively drifts toward the side wall, whereas DRICS maintains sustained forward progress with a substantially straighter planar path.
-        </h2>
+      <div class="content has-text-justified">
+        <p>
+          DRICS augments a frozen command-conditioned locomotion policy with a learned command-space disturbance-rejection layer. A planar single-rigid-body (SRB) model defines a compact body-frame disturbance <i>d</i><sub>B</sub>&nbsp;=&nbsp;[<i>f<sub>x</sub></i>, <i>f<sub>y</sub></i>, <i>&tau;<sub>z</sub></i>], which an extended-state observer (ESO) estimates on-board from base motion and the reconstructed contact wrench. An upper-level compensator maps proprioception and the disturbance estimate to bounded corrections of the forward velocity, lateral velocity, and yaw rate commands; the corrected command is executed by the frozen base policy, while the RL objective remains defined with respect to the original user command.
+        </p>
+        <ul>
+          <li><b>Command-space disturbance rejection.</b> A hierarchical compensator learns bounded 3-D command corrections through the frozen locomotion policy: gradients traverse it during training, but its parameters are never updated.</li>
+          <li><b>Model-informed disturbance estimation.</b> The SRB model and ESO bridge privileged training signals and on-board estimates; asymmetric actor&ndash;critic observations improve robustness to estimation bias.</li>
+          <li><b>Cross-policy and hardware validation.</b> DRICS attaches to frozen PPO and HIM base policies without retraining, and is validated in indoor and outdoor loaded-cart towing on a Unitree Go2.</li>
+        </ul>
       </div>
-      <div class="item">
-        <img src="static/images/carousel3.jpg" alt="Outdoor towing on a rubber surface with a 21-L payload" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          Outdoor towing on a rubber surface (21-L payload): DRICS restores the commanded 0.8 m/s forward velocity under sustained towing resistance, reducing tracking MAE by 46.2%.
-        </h2>
-      </div>
-      <div class="item">
-        <img src="static/images/carousel4.jpg" alt="Disturbance-velocity envelope for the forward channel with ESO estimation" loading="lazy"/>
-        <h2 class="subtitle has-text-centered">
-          Disturbance-velocity envelope (forward channel, ESO estimation): DRICS compensates commands across force grids of up to ±30 N, with mean gains of 65.0% at large forces.
-        </h2>
-      </div>
+    </div>
   </div>
-</div>
-</div>
 </section>
-<!-- End image carousel -->
+<!-- End overview -->
 
 
-
-
-<!-- Video carousel -->
+<!-- Real-world experiments -->
 <section class="hero is-small is-light">
   <div class="hero-body">
-    <div class="container">
-      <h2 class="title is-3">Real-World Towing Experiments</h2>
-      <div id="results-carousel" class="carousel results-carousel">
-        <div class="item item-video1">
-          <video poster="" id="video1" controls muted loop height="100%" preload="metadata">
-            <source src="static/videos/indoor_comp_1.mp4" type="video/mp4">
-          </video>
-          <h2 class="subtitle has-text-centered">
-            Indoor towing (DRICS): 0.5 m/s command with a loaded cart, tracking MAE reduced by 68.0%.
-          </h2>
-        </div>
-        <div class="item item-video2">
-          <video poster="" id="video2" controls muted loop height="100%" preload="metadata">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Real-World Experiments</h2>
+      <div class="content has-text-justified">
+        <p>
+          We deploy DRICS on a Unitree Go2 equipped with a Jetson AGX Orin and a Livox MID-360 LiDAR (FAST-LIO2 state estimation at 50 Hz). The robot tows a loaded camping cart through a rope, producing sustained disturbances from rolling resistance, wheel steering, and changing rope direction. The base policy remains frozen; DRICS uses ESO estimates only.
+        </p>
+      </div>
+
+      <!-- Indoor -->
+      <h3 class="title is-4">Indoor Loaded-Cart Towing (0.5 m/s)</h3>
+      <div class="content has-text-justified">
+        <p>
+          A 2.2 m-wide marble corridor; the cart carries a second Go2 and 9 L of water (3 L on one side). Towing drops the Base mean forward velocity from 0.442 to 0.335 m/s with progressive drift toward the side wall, whereas DRICS restores it to 0.479 m/s, reducing forward-velocity MAE from 0.166 to 0.053 m/s (<b>68.0% reduction</b>).
+        </p>
+      </div>
+      <div class="columns is-centered is-mobile is-variable is-3 results-carousel">
+        <div class="column is-half has-text-centered">
+          <video controls muted loop playsinline preload="metadata">
             <source src="static/videos/indoor_base_1.mp4" type="video/mp4">
           </video>
-          <h2 class="subtitle has-text-centered">
-            Indoor towing (Base): the frozen base policy alone slows down and drifts toward the side wall.
-          </h2>
+          <p class="comparison-label"><b>Base</b> (towing): slows down and drifts toward the side wall</p>
         </div>
-        <div class="item item-video3">
-          <video poster="" id="video3" controls muted loop height="100%" preload="metadata">
-            <source src="static/videos/outdoor_comp_1times.mp4" type="video/mp4">
+        <div class="column is-half has-text-centered">
+          <video controls muted loop playsinline preload="metadata">
+            <source src="static/videos/indoor_comp_1.mp4" type="video/mp4">
           </video>
-          <h2 class="subtitle has-text-centered">
-            Outdoor towing (DRICS): 0.8 m/s command on a rubber surface with a 21-L payload.
-          </h2>
+          <p class="comparison-label"><b>DRICS</b> (towing): sustains forward progress with the cart</p>
         </div>
-        <div class="item item-video4">
-          <video poster="" id="video4" controls muted loop height="100%" preload="metadata">
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <img src="static/images/hardware_indoor.png" alt="Indoor towing: Base vs. DRICS snapshots, estimated planar path, and three-axis velocity tracking" loading="lazy"/>
+          <p class="comparison-label">Indoor towing: snapshots, estimated planar path, and three-axis velocity tracking (shaded: 2&ndash;10 s analysis window)</p>
+        </div>
+      </div>
+
+      <!-- Outdoor -->
+      <h3 class="title is-4">Outdoor Towing on a Rubber Surface (0.8 m/s)</h3>
+      <div class="content has-text-justified">
+        <p>
+          On a rubber-surfaced sports field with a 21-L payload, towing reduces the Base mean forward velocity from 0.725 to 0.649 m/s, whereas DRICS reaches 0.803 m/s, reducing forward-velocity MAE from 0.158 to 0.085 m/s (<b>46.2% reduction</b>) without degrading lateral or yaw tracking.
+        </p>
+      </div>
+      <div class="columns is-centered is-mobile is-variable is-3 results-carousel">
+        <div class="column is-half has-text-centered">
+          <video controls muted loop playsinline preload="metadata">
             <source src="static/videos/outdoor_base_1times.mp4" type="video/mp4">
           </video>
+          <p class="comparison-label"><b>Base</b> (towing): persistent forward-speed deficit and lateral deviation</p>
+        </div>
+        <div class="column is-half has-text-centered">
+          <video controls muted loop playsinline preload="metadata">
+            <source src="static/videos/outdoor_comp_1times.mp4" type="video/mp4">
+          </video>
+          <p class="comparison-label"><b>DRICS</b> (towing): forward speed restored with a straighter path</p>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <img src="static/images/hardware_outdoor.png" alt="Outdoor towing: Base vs. DRICS snapshots, estimated planar path, and three-axis velocity tracking" loading="lazy"/>
+          <p class="comparison-label">Outdoor towing: snapshots, estimated planar path, and three-axis velocity tracking (shaded: 2&ndash;10 s analysis window)</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End real-world experiments -->
+
+
+<!-- Quantitative results -->
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Quantitative Results</h2>
+      <div class="content has-text-justified">
+        <p>
+          Hardware tracking MAE over the 2&ndash;10 s analysis window, reported as trial mean &plusmn; sample SD (<i>n</i> = number of trials). Bold marks the lower towing forward MAE in each scene.
+        </p>
+      </div>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth has-text-centered">
+          <thead>
+            <tr>
+              <th>Controller / Load</th>
+              <th><i>n</i></th>
+              <th><i>v<sub>x</sub></i> MAE [m/s] &darr;</th>
+              <th><i>v<sub>y</sub></i> MAE [m/s] &darr;</th>
+              <th><i>&omega;<sub>z</sub></i> MAE [rad/s] &darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td colspan="5" class="has-text-left"><b>Indoor: <i>v<sub>x</sub><sup>d</sup></i> = 0.5 m/s</b></td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Base, unloaded</td>
+              <td>1</td>
+              <td>0.099</td>
+              <td>0.037</td>
+              <td>0.086</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Base, towing</td>
+              <td>2</td>
+              <td>0.166 &plusmn; 0.007</td>
+              <td>0.049 &plusmn; 0.003</td>
+              <td>0.108 &plusmn; 0.006</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DRICS, towing</td>
+              <td>2</td>
+              <td><b>0.053 &plusmn; 0.002</b></td>
+              <td>0.050 &plusmn; 0.002</td>
+              <td>0.096 &plusmn; 0.010</td>
+            </tr>
+            <tr>
+              <td colspan="5" class="has-text-left"><b>Outdoor: <i>v<sub>x</sub><sup>d</sup></i> = 0.8 m/s</b></td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Base, unloaded</td>
+              <td>2</td>
+              <td>0.123 &plusmn; 0.007</td>
+              <td>0.060 &plusmn; 0.003</td>
+              <td>0.129 &plusmn; 0.004</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Base, towing</td>
+              <td>2</td>
+              <td>0.158 &plusmn; 0.003</td>
+              <td>0.088 &plusmn; 0.006</td>
+              <td>0.130 &plusmn; 0.004</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DRICS, towing</td>
+              <td>2</td>
+              <td><b>0.085 &plusmn; 0.002</b></td>
+              <td>0.082 &plusmn; 0.012</td>
+              <td>0.115 &plusmn; 0.015</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <img src="static/images/hardware_command_corrections.png" alt="Learned command corrections in towing: three-axis compensation for the indoor and outdoor trials" loading="lazy"/>
           <h2 class="subtitle has-text-centered">
-            Outdoor towing (Base): a persistent forward-speed deficit and lateral deviation.
+            Learned command corrections in towing. The compensator outputs a mean forward reference of 0.646 m/s (indoor) and 0.962 m/s (outdoor) to the frozen base policy, compensating for the sustained towing resistance.
           </h2>
         </div>
       </div>
     </div>
   </div>
 </section>
-<!-- End video carousel -->
+<!-- End quantitative results -->
 
 
+<!-- Simulation results -->
+<section class="hero is-small is-light">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <h2 class="title is-3">Simulation Results</h2>
+      <div class="content has-text-justified">
+        <p>
+          All simulation experiments run in Isaac Gym with 50 parallel environments. The <b>random scenario</b> samples velocity commands (<i>v<sub>x</sub></i>, <i>v<sub>y</sub></i>, <i>&omega;<sub>z</sub></i> &isin; [&minus;1, 1]) together with random disturbances (<i>f<sub>x</sub></i>, <i>f<sub>y</sub></i> &isin; [&minus;30, 30] N, <i>&tau;<sub>z</sub></i> &isin; [&minus;5, 5] N&middot;m); metrics are linear- and angular-velocity MAE (<i>E<sub>v</sub></i>, <i>E<sub>&omega;</sub></i>) and survival rate, aggregated as mean &plusmn; SD across 3 random seeds.
+        </p>
+      </div>
+
+      <!-- Table II -->
+      <h3 class="title is-4">Random-Scenario Evaluation</h3>
+      <div class="content has-text-justified">
+        <p>
+          Under disturbance, DRICS-ESO reduces <i>E<sub>v</sub></i> from 0.243 to 0.075 m/s, matching ground-truth-observation performance (0.072); the end-to-end Unified variant attains 0.066. All compensator variants keep survival above 99%.
+        </p>
+      </div>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth has-text-centered">
+          <thead>
+            <tr>
+              <th rowspan="2">Method</th>
+              <th colspan="3">No Disturbance</th>
+              <th colspan="3">With Disturbance</th>
+            </tr>
+            <tr>
+              <th><i>E<sub>v</sub></i> [m/s] &darr;</th>
+              <th><i>E<sub>&omega;</sub></i> [rad/s] &darr;</th>
+              <th>Surv. [%] &uarr;</th>
+              <th><i>E<sub>v</sub></i> [m/s] &darr;</th>
+              <th><i>E<sub>&omega;</sub></i> [rad/s] &darr;</th>
+              <th>Surv. [%] &uarr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="has-text-left">Base</td>
+              <td>0.063 &plusmn; 0.006</td><td>0.038 &plusmn; 0.005</td><td>99.9 &plusmn; 0.1</td>
+              <td>0.243 &plusmn; 0.003</td><td>0.197 &plusmn; 0.008</td><td>93.8 &plusmn; 0.8</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DRICS-GT</td>
+              <td>0.052 &plusmn; 0.005</td><td>0.039 &plusmn; 0.005</td><td>99.9 &plusmn; 0.1</td>
+              <td>0.072 &plusmn; 0.005</td><td>0.061 &plusmn; 0.005</td><td>99.5 &plusmn; 0.2</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DRICS-ESO</td>
+              <td>0.052 &plusmn; 0.005</td><td>0.039 &plusmn; 0.005</td><td>99.9 &plusmn; 0.1</td>
+              <td>0.075 &plusmn; 0.005</td><td>0.073 &plusmn; 0.005</td><td>99.3 &plusmn; 0.2</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Unified-GT</td>
+              <td>0.056 &plusmn; 0.003</td><td>0.044 &plusmn; 0.004</td><td>100.0</td>
+              <td>0.066 &plusmn; 0.004</td><td>0.053 &plusmn; 0.004</td><td>99.9 &plusmn; 0.1</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Unified-ESO</td>
+              <td>0.057 &plusmn; 0.003</td><td>0.045 &plusmn; 0.003</td><td>100.0</td>
+              <td>0.066 &plusmn; 0.004</td><td>0.064 &plusmn; 0.003</td><td>99.9 &plusmn; 0.1</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table III -->
+      <h3 class="title is-4">Fixed-Condition Ablation</h3>
+      <div class="content has-text-justified">
+        <p>
+          Fixed disturbance <i>d</i><sub>B</sub> = (20, 20, 4 N&middot;m) with two motion patterns. Reduction is averaged over the four errors relative to the disturbed Base: DRICS-ESO removes 75.8% of the disturbance-induced error, clearly outperforming domain randomization (DR-Base, 65.5%), and the end-to-end Unified-ESO reaches 79.3%.
+        </p>
+      </div>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth has-text-centered">
+          <thead>
+            <tr>
+              <th rowspan="2">Method</th>
+              <th colspan="2">Arc (1, 0, 1)</th>
+              <th colspan="2">Diagonal (1, 1, 0)</th>
+              <th rowspan="2">Reduction [%]</th>
+            </tr>
+            <tr>
+              <th><i>E<sub>v</sub></i> &darr;</th>
+              <th><i>E<sub>&omega;</sub></i> &darr;</th>
+              <th><i>E<sub>v</sub></i> &darr;</th>
+              <th><i>E<sub>&omega;</sub></i> &darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="has-text-left">Base, no disturbance</td>
+              <td>0.059 &plusmn; 0.003</td><td>0.038 &plusmn; 0.002</td>
+              <td>0.068 &plusmn; 0.003</td><td>0.028 &plusmn; 0.002</td>
+              <td>&ndash;</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Base</td>
+              <td>0.295 &plusmn; 0.003</td><td>0.260 &plusmn; 0.002</td>
+              <td>0.303 &plusmn; 0.004</td><td>0.353 &plusmn; 0.003</td>
+              <td>0.0</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DR-Base</td>
+              <td>0.080 &plusmn; 0.002</td><td>0.112 &plusmn; 0.001</td>
+              <td>0.122 &plusmn; 0.004</td><td>0.097 &plusmn; 0.001</td>
+              <td>65.5</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DRICS-GT</td>
+              <td>0.073 &plusmn; 0.002</td><td>0.055 &plusmn; 0.002</td>
+              <td>0.077 &plusmn; 0.003</td><td>0.066 &plusmn; 0.003</td>
+              <td>77.5</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">DRICS-ESO</td>
+              <td>0.079 &plusmn; 0.002</td><td>0.056 &plusmn; 0.002</td>
+              <td>0.091 &plusmn; 0.003</td><td>0.065 &plusmn; 0.003</td>
+              <td>75.8</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Unified-GT</td>
+              <td>0.075 &plusmn; 0.002</td><td>0.047 &plusmn; 0.003</td>
+              <td>0.062 &plusmn; 0.003</td><td>0.048 &plusmn; 0.003</td>
+              <td>80.6</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">Unified-ESO</td>
+              <td>0.078 &plusmn; 0.002</td><td>0.058 &plusmn; 0.003</td>
+              <td>0.063 &plusmn; 0.003</td><td>0.047 &plusmn; 0.005</td>
+              <td>79.3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Disturbance-velocity envelopes (Fig. 3 heatmaps + Table IV) -->
+      <h3 class="title is-4">Disturbance&ndash;Velocity Envelopes</h3>
+      <div class="content has-text-justified">
+        <p>
+          We sweep each command&ndash;disturbance pair: translational grids sample <i>v<sub>d</sub></i> &isin; {&minus;1, &minus;0.5, 0, 0.5, 1} m/s &times; <i>f</i> &isin; {&minus;30, &minus;20, &minus;10, 0, 10, 20, 30} N (35 points each), and the yaw grid samples <i>&omega;<sub>d</sub></i> &isin; {&minus;1, ..., 1} rad/s &times; <i>&tau;<sub>z</sub></i> &isin; {&minus;5, ..., 5} N&middot;m (25 points). The heatmaps below show DRICS-ESO results for all three channels.
+        </p>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-half">
+          <img src="static/images/exp3_vx_fx_eso.png" alt="Forward channel: velocity-force grid heatmap with ESO observations" loading="lazy"/>
+          <p class="comparison-label">Forward: <i>v<sub>x</sub></i> &times; <i>f<sub>x</sub></i></p>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-half">
+          <img src="static/images/exp3_vy_fy_eso.png" alt="Lateral channel: velocity-force grid heatmap with ESO observations" loading="lazy"/>
+          <p class="comparison-label">Lateral: <i>v<sub>y</sub></i> &times; <i>f<sub>y</sub></i></p>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-half">
+          <img src="static/images/exp3_wz_tz_eso.png" alt="Yaw channel: yaw-rate-torque grid heatmap with ESO observations" loading="lazy"/>
+          <p class="comparison-label">Yaw: <i>&omega;<sub>z</sub></i> &times; <i>&tau;<sub>z</sub></i></p>
+        </div>
+      </div>
+      <div class="content has-text-justified">
+        <p>
+          Averaged over each grid (gain = (<i>E</i><sub>Base</sub> &minus; <i>E</i><sub>DRICS</sub>) / <i>E</i><sub>Base</sub>), DRICS-ESO achieves mean gains of 53.5%&ndash;57.9%, increasing to 65.0%&ndash;70.5% at large disturbances; yaw tracking improves at 20 of 25 grid points, reaching 81.8% at |<i>&tau;<sub>z</sub></i>| = 5 N&middot;m. ESO thus retains most of the gain achieved with ground-truth disturbance observations.
+        </p>
+      </div>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth has-text-centered">
+          <thead>
+            <tr>
+              <th>Grid</th>
+              <th>GT, all</th>
+              <th>ESO, all</th>
+              <th>GT, large</th>
+              <th>ESO, large</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="has-text-left"><i>v<sub>x</sub></i>&ndash;<i>f<sub>x</sub></i></td>
+              <td>55.8%</td><td>53.5%</td><td>68.8%</td><td>65.0%</td>
+            </tr>
+            <tr>
+              <td class="has-text-left"><i>v<sub>y</sub></i>&ndash;<i>f<sub>y</sub></i></td>
+              <td>59.0%</td><td>57.9%</td><td>72.4%</td><td>70.5%</td>
+            </tr>
+            <tr>
+              <td class="has-text-left"><i>&omega;<sub>z</sub></i>&ndash;<i>&tau;<sub>z</sub></i></td>
+              <td>60.0%</td><td>57.7%</td><td>82.6%</td><td>81.8%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Table V -->
+      <h3 class="title is-4">Generalization to a Frozen HIM Base Policy</h3>
+      <div class="content has-text-justified">
+        <p>
+          Attaching DRICS to a frozen HIM base policy under the same random-scenario protocol. Under disturbance, HIM-DRICS-ESO reduces <i>E<sub>v</sub></i> by 68.5% and <i>E<sub>&omega;</sub></i> by 60.5%, and raises survival from 92.9% to 99.3%, while preserving nominal performance.
+        </p>
+      </div>
+      <div class="table-container">
+        <table class="table is-striped is-hoverable is-fullwidth has-text-centered">
+          <thead>
+            <tr>
+              <th rowspan="2">Method</th>
+              <th colspan="3">No Disturbance</th>
+              <th colspan="3">With Disturbance</th>
+            </tr>
+            <tr>
+              <th><i>E<sub>v</sub></i> [m/s] &darr;</th>
+              <th><i>E<sub>&omega;</sub></i> [rad/s] &darr;</th>
+              <th>Surv. [%] &uarr;</th>
+              <th><i>E<sub>v</sub></i> [m/s] &darr;</th>
+              <th><i>E<sub>&omega;</sub></i> [rad/s] &darr;</th>
+              <th>Surv. [%] &uarr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="has-text-left">HIM-Base</td>
+              <td>0.068</td><td>0.038</td><td>100.0</td>
+              <td>0.304</td><td>0.189</td><td>92.9</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">HIM-DRICS-GT</td>
+              <td>0.052</td><td>0.041</td><td>100.0</td>
+              <td>0.086</td><td>0.066</td><td>98.8</td>
+            </tr>
+            <tr>
+              <td class="has-text-left">HIM-DRICS-ESO</td>
+              <td>0.052</td><td>0.041</td><td>100.0</td>
+              <td>0.096</td><td>0.075</td><td>99.3</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+<!-- End simulation results -->
 
 
 

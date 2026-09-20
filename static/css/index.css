@@ -276,11 +276,20 @@ body {
 }
 
 .results-carousel .item img,
+.results-carousel img,
 .results-carousel video {
   margin: 0;
   border-radius: var(--border-radius);
   width: 100%;
   height: auto;
+}
+
+/* Side-by-side comparison rows (Base vs. DRICS) */
+.comparison-label {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 500;
 }
 
 .results-carousel .subtitle {

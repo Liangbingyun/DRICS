@@ -119,7 +119,7 @@ function setupVideoCarouselAutoplay() {
     });
 }
 
-$(document).ready(function() {
+document.addEventListener('DOMContentLoaded', function() {
     // Check for click events on the navbar burger icon
 
     var options = {
